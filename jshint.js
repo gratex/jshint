@@ -210,7 +210,7 @@
  isDigit, isFinite, isNaN, iterator, java, join, jshint,
  JSHINT, json, jquery, jQuery, keys, label, labelled, last, lastsemic, laxbreak, laxcomma,
  latedef, lbp, led, left, length, line, load, loadClass, localStorage, location,
- log, loopfunc, m, match, maxerr, maxlen, member,message, meta, module, moveBy,
+ log, loopfunc, m, match, maxerr, maxlen, member,message, meta, mixedtabs, module, moveBy,
  moveTo, mootools, multistr, name, navigator, new, newcap, noarg, node, noempty, nomen,
  nonew, nonstandard, nud, onbeforeunload, onblur, onerror, onevar, onecase, onfocus,
  onload, onresize, onunload, open, openDatabase, openURL, opener, opera, options, outer, param,
@@ -286,6 +286,8 @@ var JSHINT = (function () {
             laxcomma    : true, // if line breaks should not be checked around commas
             loopfunc    : true, // if functions should be allowed to be defined within
                                 // loops
+            mixedtabs   : true, // if Mixed spaces and tabs should be turned off 
+                                // completely - added by aminarik
             mootools    : true, // if MooTools globals should be predefined
             multistr    : true, // allow multiline strings
             newcap      : true, // if constructor names must be capitalized
@@ -1067,7 +1069,10 @@ var JSHINT = (function () {
 
             // If smarttabs option is used check for spaces followed by tabs only.
             // Otherwise check for any occurence of mixed tabs and spaces.
-            if (option.smarttabs)
+            // If Mixed spaces and tabs warnings are off, skip this completely
+            if (option.mixedtabs)
+            	at = -1;
+            else if (option.smarttabs)
                 at = s.search(/ \t/);
             else
                 at = s.search(/ \t|\t /);
