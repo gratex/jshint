@@ -211,7 +211,7 @@
  JSHINT, json, jquery, jQuery, keys, label, labelled, last, lastsemic, laxbreak, laxcomma,
  latedef, lbp, led, left, length, line, load, loadClass, localStorage, location,
  log, loopfunc, m, match, maxerr, maxlen, member,message, meta, mixedtabs, module, moveBy,
- moveTo, mootools, multistr, name, navigator, new, newcap, noarg, node, noempty, nomen,
+ moveTo, mootools, multistr, name, navigator, new, newcap, newcap_, noarg, node, noempty, nomen,
  nonew, nonstandard, nud, onbeforeunload, onblur, onerror, onevar, onecase, onfocus,
  onload, onresize, onunload, open, openDatabase, openURL, opener, opera, options, outer, param,
  parent, parseFloat, parseInt, passfail, plusplus, predef, print, process, prompt,
@@ -291,6 +291,7 @@ var JSHINT = (function () {
             mootools    : true, // if MooTools globals should be predefined
             multistr    : true, // allow multiline strings
             newcap      : true, // if constructor names must be capitalized
+            newcap_     : true, // if constructor names are allowed to start with underscore - added by aminarik
             noarg       : true, // if arguments.caller and arguments.callee should be
                                 // disallowed
             node        : true, // if the Node.js environment globals should be
@@ -3053,8 +3054,10 @@ loop:   for (;;) {
                     if (c.id !== 'function') {
                         i = c.value.substr(0, 1);
                         if (option.newcap && (i < 'A' || i > 'Z')) {
-                            warning("A constructor name should start with an uppercase letter.",
+                        	if ((i != '_') || !option.newcap_) {
+                        		warning("A constructor name should start with an uppercase letter.",
                                 token);
+                        	}
                         }
                     }
                 }
