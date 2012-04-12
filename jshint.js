@@ -195,8 +195,8 @@
  VBArray, WSH, WScript, XDomainRequest, Web, Window, XMLDOM, XMLHttpRequest, XMLSerializer,
  XPathEvaluator, XPathException, XPathExpression, XPathNamespace, XPathNSResolver, XPathResult,
  "\\", a, addEventListener, address, alert, apply, applicationCache, arguments, arity, asi, atob,
- b, badconst, basic, basicToken, bitwise, block, blur, boolOptions, boss, browser, btoa, c, call, callee,
- caller, cases, charAt, charCodeAt, character, clearInterval, clearTimeout,
+ b, badconst, basic, basicToken, bitwise, block, blur, boolOptions, boss, browser, btoa, c, call, 
+ callee, caller, cases, charAt, charCodeAt, character, clearInterval, clearTimeout,
  close, closed, closure, comment, condition, confirm, console, constructor,
  content, couch, create, css, curly, d, data, datalist, dd, debug, decodeURI,
  decodeURIComponent, defaultStatus, defineClass, deserialize, devel, document,
@@ -293,7 +293,8 @@ var JSHINT = (function () {
             mootools    : true, // if MooTools globals should be predefined
             multistr    : true, // allow multiline strings
             newcap      : true, // if constructor names must be capitalized
-            newcap_     : true, // if constructor names are allowed to start with underscore - added by aminarik
+            newcap_     : true, // if constructor names are allowed to start with 
+                                // underscore - added by aminarik
             noarg       : true, // if arguments.caller and arguments.callee should be
                                 // disallowed
             node        : true, // if the Node.js environment globals should be
@@ -1074,7 +1075,7 @@ var JSHINT = (function () {
             // Otherwise check for any occurence of mixed tabs and spaces.
             // If Mixed spaces and tabs warnings are off, skip this completely
             if (option.mixedtabs)
-            	at = -1;
+                at = -1;
             else if (option.smarttabs)
                 at = s.search(/ \t/);
             else
@@ -3056,10 +3057,10 @@ loop:   for (;;) {
                     if (c.id !== 'function') {
                         i = c.value.substr(0, 1);
                         if (option.newcap && (i < 'A' || i > 'Z')) {
-                        	if ((i != '_') || !option.newcap_) {
-                        		warning("A constructor name should start with an uppercase letter.",
+                            if ((i !== '_') || !option.newcap_) {
+                                warning("A constructor name should start with an uppercase letter.",
                                 token);
-                        	}
+                            }
                         }
                     }
                 }
