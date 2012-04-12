@@ -195,7 +195,7 @@
  VBArray, WSH, WScript, XDomainRequest, Web, Window, XMLDOM, XMLHttpRequest, XMLSerializer,
  XPathEvaluator, XPathException, XPathExpression, XPathNamespace, XPathNSResolver, XPathResult,
  "\\", a, addEventListener, address, alert, apply, applicationCache, arguments, arity, asi, atob,
- b, basic, basicToken, bitwise, block, blur, boolOptions, boss, browser, btoa, c, call, callee,
+ b, badconst, basic, basicToken, bitwise, block, blur, boolOptions, boss, browser, btoa, c, call, callee,
  caller, cases, charAt, charCodeAt, character, clearInterval, clearTimeout,
  close, closed, closure, comment, condition, confirm, console, constructor,
  content, couch, create, css, curly, d, data, datalist, dd, debug, decodeURI,
@@ -257,6 +257,8 @@ var JSHINT = (function () {
         // These are the JSHint boolean options.
         boolOptions = {
             asi         : true, // if automatic semicolon insertion should be tolerated
+            badconst    : true, // if "Bad constructor" warning should be supressed - by aminarik
+			                    // for cases like this: return new (Class || JsonRestStore)(options);
             bitwise     : true, // if bitwise operators should not be allowed
             boss        : true, // if advanced usage of assignments should be allowed
             browser     : true, // if the standard browser globals should be predefined
@@ -3062,7 +3064,7 @@ loop:   for (;;) {
                     }
                 }
             } else {
-                if (c.id !== '.' && c.id !== '[' && c.id !== '(') {
+                if ((c.id !== '.' && c.id !== '[' && c.id !== '(') && !option.badconst) {
                     warning("Bad constructor.", token);
                 }
             }
