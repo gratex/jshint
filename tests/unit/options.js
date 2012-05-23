@@ -170,6 +170,27 @@ exports.testProtoAndIterator = function () {
 };
 
 /**
+ * The `camelcase` option allows you to enforce use of the camel case convention.
+ */
+exports.testCamelcase = function () {
+    var source = fs.readFileSync(__dirname + '/fixtures/camelcase.js', 'utf8');
+
+    // By default, tolerate arbitrary identifiers
+    TestRun()
+        .test(source);
+
+    // Require identifiers in camel case if camelcase is true
+    TestRun()
+        .addError(5, "Identifier 'Foo_bar' is not in camel case.")
+        .addError(5, "Identifier 'test_me' is not in camel case.")
+        .addError(6, "Identifier 'test_me' is not in camel case.")
+        .addError(6, "Identifier 'test_me' is not in camel case.")
+        .addError(13, "Identifier 'test_1' is not in camel case.")
+        .test(source, { camelcase: true });
+
+};
+
+/**
  * Option `curly` allows you to enforce the use of curly braces around
  * control blocks. JavaScript allows one-line blocks to go without curly
  * braces but some people like to always use curly bracse. This option is
@@ -986,6 +1007,37 @@ exports.strings = function () {
         .test(src);
 };
 
+/*
+ * Test the `quotmark` option
+ *   quotmark    quotation mark or true (=ensure consistency)
+ */
+exports.quotes = function () {
+    var src = fs.readFileSync(__dirname + '/fixtures/quotes.js', 'utf8');
+    var src2 = fs.readFileSync(__dirname + '/fixtures/quotes2.js', 'utf8');
+
+    TestRun()
+        .test(src);
+
+    TestRun()
+        .addError(3, "Mixed double and single quotes.")
+        .test(src, { quotmark: true });
+
+    TestRun()
+        .addError(3, "Strings must use singlequote.")
+        .test(src, { quotmark: 'single' });
+
+    TestRun()
+        .addError(2, "Strings must use doublequote.")
+        .test(src, { quotmark: 'double' });
+
+    // test multiple runs (must have the same result)
+    var run = TestRun();
+    run.addError(3, "Mixed double and single quotes.")
+        .test(src, { quotmark: true });
+    run.addError(3, "Mixed double and single quotes.")
+        .test(src2, { quotmark: true });
+};
+
 exports.scope = function () {
     var src = fs.readFileSync(__dirname + '/fixtures/scope.js', 'utf8');
 
@@ -1096,6 +1148,8 @@ exports.browser = function () {
 		.addError(3, "'btoa' is not defined.")
 		.addError(6, "'DOMParser' is not defined.")
 		.addError(10, "'XMLSerializer' is not defined.")
+		.addError(14, "'NodeFilter' is not defined.")
+		.addError(15, "'Node' is not defined.")
 		.test(src, { undef: true });
 
 	TestRun().test(src, { browser: true, undef: true });
