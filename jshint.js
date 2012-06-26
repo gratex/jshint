@@ -195,8 +195,8 @@
  VBArray, WSH, WScript, XDomainRequest, Web, Window, XMLDOM, XMLHttpRequest, XMLSerializer,
  XPathEvaluator, XPathException, XPathExpression, XPathNamespace, XPathNSResolver, XPathResult,
  "\\", a, addEventListener, address, alert, apply, applicationCache, arguments, arity, asi, atob,
- b, badconst, basic, basicToken, bitwise, block, blur, boolOptions, boss, browser, btoa, c, 
- call, callee, caller, camelcase, cases, charAt, charCodeAt, character, clearInterval, clearTimeout,
+ b, badconst, basic, basicToken, bitwise, block, blur, boolOptions, boss, browser, btoa, c, call, 
+ callee, caller, cases, charAt, charCodeAt, character, clearInterval, clearTimeout,
  close, closed, closure, comment, condition, confirm, console, constructor,
  content, couch, create, css, curly, d, data, datalist, dd, debug, decodeURI,
  decodeURIComponent, defaultStatus, defineClass, deserialize, devel, document,
@@ -215,7 +215,7 @@
  nonew, nonstandard, nud, onbeforeunload, onblur, onerror, onevar, onecase, onfocus,
  onload, onresize, onunload, open, openDatabase, openURL, opener, opera, options, outer, param,
  parent, parseFloat, parseInt, passfail, plusplus, predef, print, process, prompt,
- proto, prototype, prototypejs, provides, push, quit, quotmark, range, raw, reach, reason, regexp,
+ proto, prototype, prototypejs, provides, push, quit, range, raw, reach, reason, regexp,
  readFile, readUrl, regexdash, removeEventListener, replace, report, require,
  reserved, resizeBy, resizeTo, resolvePath, resumeUpdates, respond, rhino, right,
  runCommand, scroll, screen, scripturl, scrollBy, scrollTo, scrollbar, search, seal,
@@ -262,7 +262,6 @@ var JSHINT = (function () {
             bitwise     : true, // if bitwise operators should not be allowed
             boss        : true, // if advanced usage of assignments should be allowed
             browser     : true, // if the standard browser globals should be predefined
-            camelcase   : true, // if identifiers should be required in camel case
             couch       : true, // if CouchDB globals should be predefined
             curly       : true, // if curly braces around all blocks should be required
             debug       : true, // if debugger statements should be allowed
@@ -318,6 +317,7 @@ var JSHINT = (function () {
             regexp      : true, // if the . should not be allowed in regexp literals
             rhino       : true, // if the Rhino environment globals should be predefined
             undef       : true, // if variables should be declared before used
+            uescape		: false, // gti extension - Unnecessary escapement
             scripturl   : true, // if script-targeted URLs should be tolerated
             shadow      : true, // if variable shadowing should be tolerated
             smarttabs   : true, // if smarttabs should be tolerated
@@ -341,8 +341,7 @@ var JSHINT = (function () {
             maxlen: false,
             indent: false,
             maxerr: false,
-            predef: false,
-            quotmark: false //'single'|'double'|true
+            predef: false
         },
 
         // These are JSHint boolean options which are shared with JSLint
@@ -466,8 +465,6 @@ var JSHINT = (function () {
             moveBy                   :  false,
             moveTo                   :  false,
             name                     :  false,
-            Node                     :  false,
-            NodeFilter               :  false,
             navigator                :  false,
             onbeforeunload           :  true,
             onblur                   :  true,
@@ -690,8 +687,6 @@ var JSHINT = (function () {
             Sound             : false,
             Scriptaculous     : false
         },
-
-        quotmark,
 
         rhino = {
             defineClass  : false,
@@ -1067,7 +1062,7 @@ var JSHINT = (function () {
 // Private lex methods
 
         function nextLine() {
-        	var at,
+            var at,
                 tw; // trailing whitespace check
 
             if (line >= lines.length)
@@ -1080,13 +1075,12 @@ var JSHINT = (function () {
             // If smarttabs option is used check for spaces followed by tabs only.
             // Otherwise check for any occurence of mixed tabs and spaces.
             // If Mixed spaces and tabs warnings are off, skip this completely
-            // Tabs and one space followed by block comment is allowed.
             if (option.mixedtabs)
                 at = -1;
-           	else if (option.smarttabs)
-           		at = s.search(/ \t/);
+            else if (option.smarttabs)
+                at = s.search(/ \t/);
             else
-                at = s.search(/ \t|\t [^\*]/);
+                at = s.search(/ \t|\t /);
 
             if (at >= 0)
                 warningAt("Mixed spaces and tabs.", line, at + 1);
@@ -1140,10 +1134,6 @@ var JSHINT = (function () {
                             (value !== '__dirname' && value !== '__filename')) {
                         warningAt("Unexpected {a} in '{b}'.", line, from, "dangling '_'", value);
                     }
-                } else if (option.camelcase && value.indexOf('_') > -1 &&
-                        !value.match(/^[A-Z0-9_]*$/)) {
-                    warningAt("Identifier '{a}' is not in camel case.",
-                        line, from, value);
                 }
             }
             t.value = value;
@@ -1235,28 +1225,13 @@ var JSHINT = (function () {
                                 line, character);
                     }
 
-                    if (option.quotmark) {
-                        if (option.quotmark === 'single' && x !== "'") {
-                            warningAt("Strings must use singlequote.",
-                                    line, character);
-                        } else if (option.quotmark === 'double' && x !== '"') {
-                            warningAt("Strings must use doublequote.",
-                                    line, character);
-                        } else if (option.quotmark === true) {
-                            quotmark = quotmark || x;
-                            if (quotmark !== x) {
-                                warningAt("Mixed double and single quotes.",
-                                        line, character);
-                            }
-                        }
-                    }
-
                     function esc(n) {
                         var i = parseInt(s.substr(j + 1, n), 16);
                         j += n;
                         if (i >= 32 && i <= 126 &&
                                 i !== 34 && i !== 92 && i !== 39) {
-                            warningAt("Unnecessary escapement.", line, character);
+                        	if(!option.uescape) //GTI extension
+                        		warningAt("Unnecessary escapement.", line, character);
                         }
                         character += n;
                         c = String.fromCharCode(i);
@@ -2045,25 +2020,6 @@ loop:   for (;;) {
             while (rbp < nexttoken.lbp) {
                 isArray = token.value === 'Array';
                 isObject = token.value === 'Object';
-
-                // #527, new Foo.Array(), Foo.Array(), new Foo.Object(), Foo.Object()
-                // Line breaks in IfStatement heads exist to satisfy the checkJSHint
-                // "Line too long." error.
-                if (left && (left.value || (left.first && left.first.value))) {
-                    // If the left.value is not "new", or the left.first.value is a "."
-                    // then safely assume that this is not "new Array()" and possibly
-                    // not "new Object()"...
-                    if (left.value !== 'new' ||
-                      (left.first && left.first.value && left.first.value === '.')) {
-                        isArray = false;
-                        // ...In the case of Object, if the left.value and token.value
-                        // are not equal, then safely assume that this not "new Object()"
-                        if (left.value !== token.value) {
-                            isObject = false;
-                        }
-                    }
-                }
-
                 advance();
                 if (isArray && token.id === '(' && nexttoken.id === ')')
                     warning("Use the array literal notation [].", token);
@@ -4258,7 +4214,6 @@ loop:   for (;;) {
 
         //reset values
         comma.first = true;
-        quotmark = undefined;
 
         try {
             advance();
@@ -4277,7 +4232,7 @@ loop:   for (;;) {
 
                 statements();
             }
-            advance((nexttoken && nexttoken.value !== '.')  ? '(end)' : undefined);
+            advance('(end)');
 
             var markDefined = function (name, context) {
                 do {
