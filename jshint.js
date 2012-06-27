@@ -257,8 +257,7 @@ var JSHINT = (function () {
         // These are the JSHint boolean options.
         boolOptions = {
             asi         : true, // if automatic semicolon insertion should be tolerated
-            badconst    : true, // if "Bad constructor" warning should be supressed - by aminarik
-			                    // for cases like this: return new (Class || JsonRestStore)(options);
+            badconst    : true, // gti extension - suppress 'Bad constructor' warning 
             bitwise     : true, // if bitwise operators should not be allowed
             boss        : true, // if advanced usage of assignments should be allowed
             browser     : true, // if the standard browser globals should be predefined
@@ -288,13 +287,11 @@ var JSHINT = (function () {
             laxcomma    : true, // if line breaks should not be checked around commas
             loopfunc    : true, // if functions should be allowed to be defined within
                                 // loops
-            mixedtabs   : true, // if Mixed spaces and tabs should be turned off 
-                                // completely - added by aminarik
+            mixedtabs   : true, // gti extension - suppress 'Mixed spaces and tabs' 
             mootools    : true, // if MooTools globals should be predefined
             multistr    : true, // allow multiline strings
             newcap      : true, // if constructor names must be capitalized
-            newcap_     : true, // if constructor names are allowed to start with 
-                                // underscore - added by aminarik
+            newcap_     : true, // gti extension - allow constructor names starting with underscore
             noarg       : true, // if arguments.caller and arguments.callee should be
                                 // disallowed
             node        : true, // if the Node.js environment globals should be
@@ -317,7 +314,7 @@ var JSHINT = (function () {
             regexp      : true, // if the . should not be allowed in regexp literals
             rhino       : true, // if the Rhino environment globals should be predefined
             undef       : true, // if variables should be declared before used
-            uescape		: false, // gti extension - Unnecessary escapement
+            uescape     : false, // gti extension - Unnecessary escapement
             scripturl   : true, // if script-targeted URLs should be tolerated
             shadow      : true, // if variable shadowing should be tolerated
             smarttabs   : true, // if smarttabs should be tolerated
