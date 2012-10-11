@@ -195,7 +195,7 @@
  VBArray, WSH, WScript, XDomainRequest, Web, Window, XMLDOM, XMLHttpRequest, XMLSerializer,
  XPathEvaluator, XPathException, XPathExpression, XPathNamespace, XPathNSResolver, XPathResult,
  "\\", a, addEventListener, address, alert, apply, applicationCache, arguments, arity, asi, atob,
- b, badconst, basic, basicToken, bitwise, block, blur, boolOptions, boss, browser, btoa, c, call, 
+ b, badconst, badconstobj, basic, basicToken, bitwise, block, blur, boolOptions, boss, browser, btoa, c, call, 
  callee, caller, cases, charAt, charCodeAt, character, clearInterval, clearTimeout,
  close, closed, closure, comment, condition, confirm, console, constructor,
  content, couch, create, css, curly, d, data, datalist, dd, debug, decodeURI,
@@ -257,7 +257,8 @@ var JSHINT = (function () {
         // These are the JSHint boolean options.
         boolOptions = {
             asi         : true, // if automatic semicolon insertion should be tolerated
-            badconst    : true, // gti extension - suppress 'Bad constructor' warning 
+            badconst    : true, // gti extension - suppress 'Bad constructor' warning
+            badconstobj : true, // gti extension - true to suppress "Don't use {} as constructor"
             bitwise     : true, // if bitwise operators should not be allowed
             boss        : true, // if advanced usage of assignments should be allowed
             browser     : true, // if the standard browser globals should be predefined
@@ -269,6 +270,7 @@ var JSHINT = (function () {
             dojo        : true, // if Dojo Toolkit globals should be predefined
             eqeqeq      : true, // if === should be required
             eqnull      : true, // if == null comparisons should be tolerated
+            poorrelation: true, // gti - extension, set to false to allow (ignore)  == and !== also for PoorRelations (see code) 	
             es5         : true, // if ES5 syntax should be allowed
             esnext      : true, // if es.next specific syntax should be allowed
             evil        : true, // if eval should be allowed
@@ -926,6 +928,8 @@ var JSHINT = (function () {
             }
         }
     }
+    
+    
 
     function assume() {
         if (option.couch) {
@@ -2270,6 +2274,7 @@ loop:   for (;;) {
 
 
     function isPoorRelation(node) {
+    	if(option.poorrelation === false) return false;
         return node &&
               ((node.type === '(number)' && +node.value === 0) ||
                (node.type === '(string)' && node.value === '') ||
@@ -3042,7 +3047,9 @@ loop:   for (;;) {
                 case 'Boolean':
                 case 'Math':
                 case 'JSON':
-                    warning("Do not use {a} as a constructor.", token, c.value);
+                	if(!option.badconstobj) {
+                		warning("Do not use {a} as a constructor.", token, c.value);
+                	}
                     break;
                 case 'Function':
                     if (!option.evil) {
