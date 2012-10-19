@@ -1,30 +1,3 @@
-/* Old version, look for src/stable/jshint.js*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*!
  * JSHint, by JSHint Community.
  *
@@ -297,7 +270,8 @@ var JSHINT = (function () {
             dojo        : true, // if Dojo Toolkit globals should be predefined
             eqeqeq      : true, // if === should be required
             eqnull      : true, // if == null comparisons should be tolerated
-            poorrelation: true, // gti - extension, set to false to allow (ignore)  == and !== also for PoorRelations (see code) 	
+            poorrelation: true, // gti extension, set to false to allow (ignore)  == and !== also for PoorRelations (see code)
+            confexclam  : true, // gti extension, set to true supress "confusing use of !" 
             es5         : true, // if ES5 syntax should be allowed
             esnext      : true, // if es.next specific syntax should be allowed
             evil        : true, // if eval should be allowed
@@ -1258,7 +1232,7 @@ var JSHINT = (function () {
                         j += n;
                         if (i >= 32 && i <= 126 &&
                                 i !== 34 && i !== 92 && i !== 39) {
-                        	if(!option.uescape) //GTI extension
+                        	if(!option.uescape)
                         		warningAt("Unnecessary escapement.", line, character);
                         }
                         character += n;
@@ -2261,7 +2235,9 @@ loop:   for (;;) {
                 nonadjacent(token, nexttoken);
             }
             if (s === "in" && left.id === "!") {
-                warning("Confusing use of '{a}'.", left, '!');
+            	if(!option.confexclam){
+            		warning("Confusing use of '{a}'.", left, '!');
+                }
             }
             if (typeof f === 'function') {
                 return f(left, this);
@@ -2287,10 +2263,14 @@ loop:   for (;;) {
                 f.apply(this, [left, right]);
             }
             if (left.id === '!') {
-                warning("Confusing use of '{a}'.", left, '!');
+            	if(!option.confexclam){
+            		warning("Confusing use of '{a}'.", left, '!');
+            	}
             }
             if (right.id === '!') {
-                warning("Confusing use of '{a}'.", right, '!');
+            	if(!option.confexclam){
+            		warning("Confusing use of '{a}'.", right, '!');
+            	}
             }
             this.left = left;
             this.right = right;
@@ -3058,7 +3038,9 @@ loop:   for (;;) {
         this.right = expression(150);
         this.arity = 'unary';
         if (bang[this.right.id] === true) {
-            warning("Confusing use of '{a}'.", this, '!');
+        	if(!option.confexclam){
+        		warning("Confusing use of '{a}'.", this, '!');
+        	}	
         }
         return this;
     });
