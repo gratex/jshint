@@ -1,3 +1,30 @@
+/* Old version, look for src/stable/jshint.js*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*!
  * JSHint, by JSHint Community.
  *

@@ -188,9 +188,9 @@
  VBArray, WeakMap, WSH, WScript, XDomainRequest, Web, Window, XMLDOM, XMLHttpRequest, XMLSerializer,
  XPathEvaluator, XPathException, XPathExpression, XPathNamespace, XPathNSResolver, XPathResult,
  "\\", a, abs, addEventListener, address, alert, apply, applicationCache, arguments, arity,
- asi, atob, b, basic, basicToken, bitwise, blacklist, block, blur, boolOptions, boss,
- browser, btoa, c, call, callee, caller, camelcase, cases, charAt, charCodeAt, character,
- clearInterval, clearTimeout, close, closed, closure, comment, complexityCount, condition,
+ asi, atob, b, badconst, badconstobj, basic, basicToken, bitwise, blacklist, block, blur, boolOptions, 
+ boss, browser, btoa, c, call, callee, caller, camelcase, cases, charAt, charCodeAt, character,
+ clearInterval, clearTimeout, close, closed, closure, comment, complexityCount, condition, confexclam,
  confirm, console, constructor, content, couch, create, css, curly, d, data, datalist, dd, debug,
  decodeURI, decodeURIComponent, defaultStatus, defineClass, deserialize, devel, document,
  dojo, dijit, dojox, define, else, emit, encodeURI, encodeURIComponent, elem,
@@ -204,10 +204,10 @@
  JSHINT, json, jquery, jQuery, keys, label, labelled, last, lastcharacter, lastsemic, laxbreak,
  laxcomma, latedef, lbp, led, left, length, line, load, loadClass, localStorage, location,
  log, loopfunc, m, match, max, maxcomplexity, maxdepth, maxerr, maxlen, maxstatements, maxparams,
- member, message, meta, module, moveBy, moveTo, mootools, multistr, name, navigator, new, newcap,
- nestedBlockDepth, noarg, node, noempty, nomen, nonew, nonstandard, nud, onbeforeunload, onblur,
+ member, message, meta, mixedtabs, module, moveBy, moveTo, mootools, multistr, name, navigator, new, newcap,
+ newcap_, nestedBlockDepth, noarg, node, noempty, nomen, nonew, nonstandard, nud, onbeforeunload, onblur,
  onerror, onevar, onecase, onfocus, onload, onresize, onunload, open, openDatabase, openURL,
- opener, opera, options, outer, param, parent, parseFloat, parseInt, passfail, plusplus,
+ opener, opera, options, outer, param, parent, parseFloat, parseInt, passfail, plusplus, poorrelation,
  postMessage, pop, predef, print, process, prompt, proto, prototype, prototypejs, provides, push,
  quit, quotmark, range, raw, reach, reason, regexp, readFile, readUrl, regexdash,
  removeEventListener, replace, report, require, reserved, resizeBy, resizeTo, resolvePath,
@@ -215,7 +215,7 @@
  scrollTo, scrollbar, search, seal, self, send, serialize, sessionStorage, setInterval, setTimeout,
  setter, setterToken, shift, slice, smarttabs, sort, spawn, split, statement, statementCount, stack,
  status, start, strict, sub, substr, supernew, shadow, supplant, sum, sync, test, toLowerCase,
- toString, toUpperCase, toint32, token, tokens, top, trailing, type, typeOf, Uint16Array,
+ toString, toUpperCase, toint32, token, tokens, top, trailing, type, typeOf, uescape, Uint16Array,
  Uint32Array, Uint8Array, undef, undefs, unused, urls, validthis, value, valueOf, var, vars,
  version, verifyMaxParametersPerFunction, verifyMaxStatementsPerFunction,
  verifyMaxComplexityPerFunction, verifyMaxNestedBlockDepthPerFunction, WebSocket, withstmt, white,
@@ -253,10 +253,13 @@ var JSHINT = (function () {
 		// These are the JSHint boolean options.
 		boolOptions = {
 			asi			: true, // if automatic semicolon insertion should be tolerated
+			badconst    : true, // gti extension - suppress 'Bad constructor' warning
+			badconstobj : true, // gti extension - true to suppress "Don't use {} as constructor"
 			bitwise		: true, // if bitwise operators should not be allowed
 			boss		: true, // if advanced usage of assignments should be allowed
 			browser		: true, // if the standard browser globals should be predefined
 			camelcase	: true, // if identifiers should be required in camel case
+			confexclam  : true, // gti extension, set to true supress "confusing use of !"
 			couch		: true, // if CouchDB globals should be predefined
 			curly		: true, // if curly braces around all blocks should be required
 			debug		: true, // if debugger statements should be allowed
@@ -283,9 +286,11 @@ var JSHINT = (function () {
 			laxcomma	: true, // if line breaks should not be checked around commas
 			loopfunc	: true, // if functions should be allowed to be defined within
 								// loops
+			mixedtabs   : true, // gti extension - suppress 'Mixed spaces and tabs'
 			mootools	: true, // if MooTools globals should be predefined
 			multistr	: true, // allow multiline strings
 			newcap		: true, // if constructor names must be capitalized
+			newcap_     : true, // gti extension - allow constructor names starting with underscore
 			noarg		: true, // if arguments.caller and arguments.callee should be
 								// disallowed
 			node		: true, // if the Node.js environment globals should be
@@ -300,6 +305,8 @@ var JSHINT = (function () {
 			onecase		: true, // if one case switch statements should be allowed
 			passfail	: true, // if the scan should stop on first error
 			plusplus	: true, // if increment/decrement should not be allowed
+			poorrelation: true, // gti - extension, set to false to allow (ignore)  == and 
+								// !== also for PoorRelations (see code) 
 			proto		: true, // if the `__proto__` property should be allowed
 			prototypejs : true, // if Prototype and Scriptaculous globals should be
 								// predefined
@@ -307,6 +314,7 @@ var JSHINT = (function () {
 								// should be tolerated
 			regexp		: true, // if the . should not be allowed in regexp literals
 			rhino		: true, // if the Rhino environment globals should be predefined
+			uescape     : false, // gti extension - Unnecessary escapement
 			undef		: true, // if variables should be declared before used
 			unused		: true, // if variables should be always used
 			scripturl	: true, // if script-targeted URLs should be tolerated
@@ -1119,7 +1127,10 @@ var JSHINT = (function () {
 			// If smarttabs option is used check for spaces followed by tabs only.
 			// Otherwise check for any occurence of mixed tabs and spaces.
 			// Tabs and one space followed by block comment is allowed.
-			if (option.smarttabs) {
+			// If Mixed spaces and tabs warnings are off, skip this completely
+			if (option.mixedtabs)
+                at = -1;
+            else if (option.smarttabs) {
 				// negative look-behind for "//"
 				match = s.match(/(\/\/)? \t/);
 				at = match && !match[1] ? 0 : -1;
@@ -1320,7 +1331,8 @@ var JSHINT = (function () {
 						j += n;
 						if (i >= 32 && i <= 126 &&
 								i !== 34 && i !== 92 && i !== 39) {
-							warningAt("Unnecessary escapement.", line, character);
+							if(!option.uescape) //GTI extension
+								warningAt("Unnecessary escapement.", line, character);
 						}
 						character += n;
 						c = String.fromCharCode(i);
@@ -2410,7 +2422,9 @@ loop:
 				nonadjacent(token, nexttoken);
 			}
 			if (s === "in" && left.id === "!") {
-				warning("Confusing use of '{a}'.", left, "!");
+				if(!option.confexclam){
+					warning("Confusing use of '{a}'.", left, "!");
+				}
 			}
 			if (typeof f === "function") {
 				return f(left, this);
@@ -2437,10 +2451,14 @@ loop:
 				f.apply(this, [left, right]);
 			}
 			if (left.id === "!") {
-				warning("Confusing use of '{a}'.", left, "!");
+				if(!option.confexclam){
+					warning("Confusing use of '{a}'.", left, "!");
+				}
 			}
 			if (right.id === "!") {
-				warning("Confusing use of '{a}'.", right, "!");
+				if(!option.confexclam){
+					warning("Confusing use of '{a}'.", right, "!");
+				}
 			}
 			this.left = left;
 			this.right = right;
@@ -2451,6 +2469,7 @@ loop:
 
 
 	function isPoorRelation(node) {
+		if(option.poorrelation === false) return false;
 		return node &&
 			  ((node.type === "(number)" && +node.value === 0) ||
 			   (node.type === "(string)" && node.value === "") ||
@@ -3231,7 +3250,9 @@ loop:
 		this.right = expression(150);
 		this.arity = "unary";
 		if (bang[this.right.id] === true) {
-			warning("Confusing use of '{a}'.", this, "!");
+			if(!option.confexclam){
+				warning("Confusing use of '{a}'.", this, "!");
+			}
 		}
 		return this;
 	});
@@ -3247,7 +3268,9 @@ loop:
 				case "Boolean":
 				case "Math":
 				case "JSON":
-					warning("Do not use {a} as a constructor.", prevtoken, c.value);
+					if(!option.badconstobj) {
+						warning("Do not use {a} as a constructor.", prevtoken, c.value);
+					}
 					break;
 				case "Function":
 					if (!option.evil) {
@@ -3261,13 +3284,15 @@ loop:
 					if (c.id !== "function") {
 						i = c.value.substr(0, 1);
 						if (option.newcap && (i < "A" || i > "Z") && !is_own(global, c.value)) {
-							warning("A constructor name should start with an uppercase letter.",
+							if ((i !== '_') || !option.newcap_) {
+								warning("A constructor name should start with an uppercase letter.",
 								token);
+							}
 						}
 					}
 				}
 			} else {
-				if (c.id !== "." && c.id !== "[" && c.id !== "(") {
+				if (!option.badconst && (c.id !== "." && c.id !== "[" && c.id !== "(")) {
 					warning("Bad constructor.", token);
 				}
 			}
