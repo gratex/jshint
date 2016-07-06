@@ -1,3 +1,5 @@
+# DEPRECATED, use standard jshint instead
+
 JSHint, A Static Code Analysis Tool for JavaScript
 ==================================================
 
